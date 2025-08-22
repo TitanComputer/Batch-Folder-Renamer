@@ -3,6 +3,7 @@ from customtkinter import filedialog
 import os
 from tkinter import messagebox
 import threading
+import re
 
 
 class BatchFolderRenamer(ctk.CTk):
@@ -88,10 +89,17 @@ class BatchFolderRenamer(ctk.CTk):
             full_path = os.path.join(folder_path, item)
             if os.path.isdir(full_path):
                 new_name = item
+
                 for prefix in prefixes:
                     if new_name.startswith(prefix):
                         new_name = new_name[len(prefix) :]
                 new_name = new_name.strip()
+
+                match = re.search(r"(s\d{2})", new_name, re.IGNORECASE)
+                if match:
+                    index = match.start()
+                    new_name = new_name[:index].strip()
+
                 if new_name and new_name != item:
                     new_full_path = os.path.join(folder_path, new_name)
                     if not os.path.exists(new_full_path):
