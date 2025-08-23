@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from PIL import ImageTk
 from customtkinter import filedialog
 import os
 from tkinter import messagebox
@@ -11,6 +12,9 @@ class BatchFolderRenamer(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Batch Folder Renamer")
+        self.iconpath = ImageTk.PhotoImage(file="icon.png")
+        self.wm_iconbitmap()
+        self.iconphoto(False, self.iconpath)
         self.update_idletasks()
         width = 500
         height = 500
@@ -32,7 +36,7 @@ class BatchFolderRenamer(ctk.CTk):
 
         # Row 1: Entry + Browse Button
         self.path_entry = ctk.CTkEntry(self, height=20, placeholder_text="Target Directory", font=font_bold)
-        self.path_entry.insert(0, "D:\\wwwroot\\T2")
+        self.path_entry.insert(0, "C:\\inetpub\\wwwroot\\T2")
         self.path_entry.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="nsew")
         self.path_entry.configure(state="readonly")
 
