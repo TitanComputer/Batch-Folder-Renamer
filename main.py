@@ -103,8 +103,16 @@ class BatchFolderRenamer(ctk.CTk):
                 if new_name and new_name != item:
                     new_full_path = os.path.join(folder_path, new_name)
                     if not os.path.exists(new_full_path):
-                        os.rename(full_path, new_full_path)
-                        count += 1
+                        try:
+                            os.rename(full_path, new_full_path)
+                            count += 1
+                        except PermissionError:
+                            messagebox.showerror(
+                                "Access Denied",
+                                "Cannot access or modify the selected folder.\n"
+                                "Please check permissions or run the program as Administrator.",
+                            )
+                            return
 
         if count == 0:
             messagebox.showinfo("Done", "No folders were processed.")
