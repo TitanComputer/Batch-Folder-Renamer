@@ -101,8 +101,12 @@ class BatchFolderRenamer(ctk.CTk):
                     index = match.start()
                     new_name = new_name[:index].strip()
 
-                allowed_chars = string.ascii_letters + string.digits
+                allowed_chars = string.ascii_letters + string.digits + ".-_ "
                 new_name = re.sub(f"^[^{allowed_chars}]+|[^{allowed_chars}]+$", "", new_name)
+
+                new_name = re.sub(r"[._-]+", " ", new_name)
+
+                new_name = new_name.title().strip()
 
                 if new_name and new_name != item:
                     new_full_path = os.path.join(folder_path, new_name)
