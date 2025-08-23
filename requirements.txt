@@ -3,4 +3,5 @@ darkdetect==0.8.0
 Nuitka==2.7.12
 ordered-set==4.1.0
 packaging==25.0
+pillow==11.3.0
 zstandard==0.24.0
