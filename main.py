@@ -91,22 +91,28 @@ class BatchFolderRenamer(ctk.CTk):
             if os.path.isdir(full_path):
                 new_name = item
 
+                # Remove prefixes
                 for prefix in prefixes:
                     if new_name.startswith(prefix):
                         new_name = new_name[len(prefix) :]
                 new_name = new_name.strip()
 
+                # Remove suffix starting from sXX or SXX
                 match = re.search(r"(s\d{2})", new_name, re.IGNORECASE)
                 if match:
                     index = match.start()
                     new_name = new_name[:index].strip()
 
-                allowed_chars = string.ascii_letters + string.digits + ".-_ "
+                # Remove leading/trailing invalid chars
+                allowed_chars = string.ascii_letters + string.digits
                 new_name = re.sub(f"^[^{allowed_chars}]+|[^{allowed_chars}]+$", "", new_name)
 
-                new_name = re.sub(r"[._-]+", " ", new_name)
+                # Replace dots, dashes, underscores with spaces
+                new_name = re.sub(r"[.\-_]+", " ", new_name)
 
-                new_name = new_name.title().strip()
+                # Capitalize and convert spaces to hyphens
+                new_name = new_name.title()
+                new_name = new_name.replace(" ", "-")
 
                 if new_name and new_name != item:
                     new_full_path = os.path.join(folder_path, new_name)
