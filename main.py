@@ -12,7 +12,7 @@ class BatchFolderRenamer(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Batch Folder Renamer")
-        self.iconpath = ImageTk.PhotoImage(file="icon.png")
+        self.iconpath = ImageTk.PhotoImage(file=self.resource_path("icon.png"))
         self.wm_iconbitmap()
         self.iconphoto(False, self.iconpath)
         self.update_idletasks()
@@ -69,6 +69,10 @@ class BatchFolderRenamer(ctk.CTk):
         self.start_btn.grid(row=2, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="nsew")
         self.start_btn.configure(font=ctk.CTkFont(size=16, weight="bold"))
         self.start_btn.configure(command=self.start_process_threaded)
+
+    def resource_path(self, relative_path):
+        temp_dir = os.path.dirname(__file__)
+        return os.path.join(temp_dir, relative_path)
 
     def browse_folder(self):
         folder_selected = filedialog.askdirectory(title="Select Target Folder")
