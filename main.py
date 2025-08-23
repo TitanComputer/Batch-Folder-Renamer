@@ -4,6 +4,7 @@ import os
 from tkinter import messagebox
 import threading
 import re
+import string
 
 
 class BatchFolderRenamer(ctk.CTk):
@@ -57,7 +58,7 @@ class BatchFolderRenamer(ctk.CTk):
         )
         self.prefix_text.grid(row=1, column=0, sticky="nsew", padx=(5, 0), pady=5)
         self.prefix_text.insert("0.0", "Torrenting\n")
-        self.prefix_text.insert("1.0", "www.UIndex.org    -     \n")
+        self.prefix_text.insert("1.0", "www.UIndex.org\n")
 
         # Row 3: Start Button
         self.start_btn = ctk.CTkButton(self, text="Start Process", height=20)
@@ -99,6 +100,9 @@ class BatchFolderRenamer(ctk.CTk):
                 if match:
                     index = match.start()
                     new_name = new_name[:index].strip()
+
+                allowed_chars = string.ascii_letters + string.digits
+                new_name = re.sub(f"^[^{allowed_chars}]+|[^{allowed_chars}]+$", "", new_name)
 
                 if new_name and new_name != item:
                     new_full_path = os.path.join(folder_path, new_name)
