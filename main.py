@@ -122,9 +122,14 @@ class BatchFolderRenamer(ctk.CTk):
                 new_name = new_name.title()
                 new_name = new_name.replace(" ", "-")
 
+                def case_sensitive_exists(path):
+                    directory, name = os.path.split(path)
+                    return name in os.listdir(directory)
+
                 if new_name and new_name != item:
                     new_full_path = os.path.join(folder_path, new_name)
-                    if not os.path.exists(new_full_path):
+                    if not case_sensitive_exists(new_full_path):
+                        # if not os.path.exists(new_full_path):
                         try:
                             os.rename(full_path, new_full_path)
                             count += 1
