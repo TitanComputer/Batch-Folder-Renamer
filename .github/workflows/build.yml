@@ -87,6 +87,9 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         if: github.event.inputs.release == 'true'
         with:
           tag_name: v${{ env.version }}
@@ -95,6 +98,8 @@ jobs:
           prerelease: false
 
       - name: Upload EXE to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
