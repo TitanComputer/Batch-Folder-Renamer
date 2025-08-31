@@ -72,10 +72,9 @@ jobs:
 
       - name: Read APP_VERSION from main.py
         id: get_version
-        shell: bash
         run: |
-          version=$(sed -n 's/^APP_VERSION *= *"\(.*\)"/\1/p' main.py)
-          echo "version=$version" >> $GITHUB_ENV
+          $version = Select-String -Path main.py -Pattern '^APP_VERSION\s*=\s*"(.*)"' | ForEach-Object { $_.Matches[0].Groups[1].Value }
+          echo "version=$version" >> $env:GITHUB_ENV
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
