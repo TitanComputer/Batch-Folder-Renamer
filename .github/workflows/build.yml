@@ -43,26 +43,27 @@ jobs:
           echo "UPX_BIN=$dst" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Build with Nuitka + UPX
-        shell: powershell
+        shell: bash
         run: |
-          python -m nuitka ^
-            --jobs=4 ^
-            --enable-plugin=upx ^
-            --upx-binary="${env:UPX_BIN}" ^
-            --enable-plugin=multiprocessing ^
-            --lto=yes ^
-            --enable-plugin=tk-inter ^
-            --windows-console-mode=disable ^
-            --follow-imports ^
-            --windows-icon-from-ico="icon.png" ^
-            --include-data-files=icon.png=icon.png ^
-            --python-flag=no_site,no_asserts,no_docstrings ^
-            --onefile ^
-            --standalone ^
-            --msvc=latest ^
-            --assume-yes-for-downloads ^
-            --output-filename=Batch-Folder-Renamer ^
+          python -m nuitka \
+            --jobs=4 \
+            --enable-plugin=upx \
+            --upx-binary="$UPX_BIN" \
+            --enable-plugin=multiprocessing \
+            --lto=yes \
+            --enable-plugin=tk-inter \
+            --windows-console-mode=disable \
+            --follow-imports \
+            --windows-icon-from-ico="icon.png" \
+            --include-data-files=icon.png=icon.png \
+            --python-flag=no_site,no_asserts,no_docstrings \
+            --onefile \
+            --standalone \
+            --msvc=latest \
+            --assume-yes-for-downloads \
+            --output-filename=Batch-Folder-Renamer \
             main.py
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
