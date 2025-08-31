@@ -7,11 +7,13 @@ import threading
 import re
 import string
 
+APP_VERSION = "1.0.0"
+
 
 class BatchFolderRenamer(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Batch Folder Renamer")
+        self.title(f"Batch Folder Renamer v{APP_VERSION}")
         self.iconpath = ImageTk.PhotoImage(file=self.resource_path("icon.png"))
         self.wm_iconbitmap()
         self.iconphoto(False, self.iconpath)
