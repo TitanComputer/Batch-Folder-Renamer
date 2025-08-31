@@ -76,11 +76,16 @@ jobs:
           $version = Select-String -Path main.py -Pattern '^APP_VERSION\s*=\s*"(.*)"' | ForEach-Object { $_.Matches[0].Groups[1].Value }
           echo "version=$version" >> $env:GITHUB_ENV
 
+      - name: Debug Version
+        run: echo "Version is $env:version"
+        shell: pwsh
+        
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: v${{ env.VERSION }}
+          tag_name: v${{ env.version }}
+          name: Release v${{ env.version }}
           body_path: CHANGELOG.md
           draft: false
           prerelease: false
