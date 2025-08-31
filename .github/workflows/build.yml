@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"   # adjust if you need a specific version
+          python-version: "3.11"
           cache: "pip"
           cache-dependency-path: |
             requirements.txt
@@ -33,7 +33,7 @@ jobs:
       - name: Download UPX
         shell: powershell
         run: |
-          $UPX_VERSION = "5.0.2"  # bump when needed
+          $UPX_VERSION = "5.0.2"
           $zip = "$env:RUNNER_TEMP\upx.zip"
           $dst = "C:\UPX"
           Invoke-WebRequest -Uri "https://github.com/upx/upx/releases/download/v$UPX_VERSION/upx-$UPX_VERSION-win64.zip" -OutFile $zip
@@ -64,16 +64,12 @@ jobs:
             --output-filename=Batch-Folder-Renamer \
             main.py
 
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Batch-Folder-Renamer
-          path: |
-            Batch-Folder-Renamer.exe
-            main.build/**
-          include-hidden-files: true
-          
+          path: Batch-Folder-Renamer.exe
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
