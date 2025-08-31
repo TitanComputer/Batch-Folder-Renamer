@@ -73,3 +73,16 @@ jobs:
             Batch-Folder-Renamer.exe
             main.build/**
           include-hidden-files: true
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: false
+          prerelease: false
+
+      - name: Upload EXE to Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: Batch-Folder-Renamer.exe
