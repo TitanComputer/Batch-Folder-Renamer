@@ -84,23 +84,6 @@ jobs:
       - name: Debug Version
         run: echo "Version is $env:version"
         shell: pwsh
-        
-      - name: Ensure CHANGELOG.md exists
-        shell: pwsh
-        run: |
-          git fetch --tags
-
-          $lastTag = (git describe --tags --abbrev=0 2>$null).Trim()
-          if ($lastTag) {
-            Write-Host "Generating changelog from $lastTag..HEAD"
-            git log "$lastTag..HEAD" --pretty=format:'- %s (%an)' | Out-File -FilePath CHANGELOG.md -Encoding utf8
-          } else {
-            Write-Host "No previous tag found — generating full log"
-            git log --pretty=format:'- %s (%an)' | Out-File -FilePath CHANGELOG.md -Encoding utf8
-          }
-
-          Write-Host "---- CHANGELOG.md ----"
-          Get-Content -Raw -Encoding UTF8 CHANGELOG.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -108,7 +91,6 @@ jobs:
         with:
           tag_name: v${{ env.version }}
           name: Release v${{ env.version }}
-          body_path: CHANGELOG.md
           draft: false
           prerelease: false
 
