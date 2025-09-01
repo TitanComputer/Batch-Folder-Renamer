@@ -99,4 +99,4 @@ jobs:
           name: v${{ env.version }}
           draft: false
           prerelease: false
-          files: Batch-Folder-Renamer-v${{ env.version }}.exe
+          files: Batch-Folder-Renamer.exe
