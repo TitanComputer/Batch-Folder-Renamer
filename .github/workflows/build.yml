@@ -97,7 +97,6 @@ jobs:
         with:
           tag_name: v${{ env.version }}
           name: v${{ env.version }}
-          release_name: v${{ env.version }}
           draft: false
           prerelease: false
           files: Batch-Folder-Renamer.exe
