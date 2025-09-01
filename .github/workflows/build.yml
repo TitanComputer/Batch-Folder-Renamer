@@ -93,10 +93,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        if: github.event.inputs.release == 'true'
+        if: github.event.inputs.release == 'true' || startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: v${{ env.version }}
-          name: Release v${{ env.version }}
+          name: v${{ env.version }}
           draft: false
           prerelease: false
 
@@ -104,6 +104,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.event.inputs.release == 'true' || startsWith(github.ref, 'refs/tags/')
         with:
           files: Batch-Folder-Renamer.exe
