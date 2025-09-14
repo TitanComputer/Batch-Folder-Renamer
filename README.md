@@ -30,9 +30,28 @@ Or, run the Batch-Folder-Renamer.exe file directly if you downloaded the compile
 
 ### 🖥️ How to Use the GUI
 
-1. Run the application.
-2. Select the directory containing the folders to rename.
-3. Click **Start** to process and clean folder names.
+## How to Use
+
+1. **Select a Folder**  
+   - Click the **Browse** button and choose the main folder that contains your subfolders.
+
+2. **Configure Prefixes**  
+   - In the **Prefix Box**, add the text lines you want the program to remove from the beginning of each folder name.  
+   - Example:  
+     ```
+     Torrenting
+     www.UIndex.org -
+     ```
+
+3. **Start the Process**  
+   - Click the **Start Process** button.  
+   - The program will:
+     - Remove any defined prefixes.  
+     - Remove suffixes starting from `S01`, `s01`, etc. (season markers).  
+     - Trim extra characters from the start and end of names.  
+     - Replace dots (`.`), underscores (`_`), or dashes (`-`) with spaces.  
+     - Capitalize each word (Title Case).  
+     - Replace spaces with dashes (`-`).  
 
 ---
 
