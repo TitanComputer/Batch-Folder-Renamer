@@ -13,7 +13,7 @@ A simple batch folder renaming tool with a minimal GUI built using CustomTkinter
 
 ## 🖼️ Screenshots
 
-
+<img width="520" height="546" alt="Untitled3" src="https://github.com/user-attachments/assets/15727611-bbc9-4b22-a917-bf1661a35e5f" />
 
 ## 📥 Download
 
