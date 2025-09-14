@@ -5,10 +5,11 @@ A simple batch folder renaming tool with a minimal GUI built using CustomTkinter
 ---
 
 ## ✨ Features
-- Automatically remove predefined prefixes.
-- Clean up suffixes (TV series season numbers).
-- Format folder names by removing extra spaces and dots.
+- 🚀 Automatically remove predefined prefixes.
+- 🧠 Clean up suffixes (TV series season numbers).
+- 🔄 Format folder names by removing extra spaces and dots.
 - 📥 Downloadable `.exe` version (Windows only)
+
 
 ## 🖼️ Screenshots
 
