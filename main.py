@@ -7,7 +7,7 @@ import threading
 import re
 import string
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.1.0"
 
 
 class BatchFolderRenamer(ctk.CTk):
@@ -119,6 +119,9 @@ class BatchFolderRenamer(ctk.CTk):
 
                 # Replace dots, dashes, underscores with spaces
                 new_name = re.sub(r"[.\-_]+", " ", new_name)
+
+                # Replace & with And
+                new_name = new_name.replace("&", "And")
 
                 # Capitalize and convert spaces to hyphens
                 new_name = new_name.title()
