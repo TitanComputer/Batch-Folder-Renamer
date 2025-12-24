@@ -1,22 +1,70 @@
 import customtkinter as ctk
 from PIL import ImageTk
 from customtkinter import filedialog
-import os
+import tkinter as tk
 from tkinter import messagebox
+import os
 import threading
 import re
 import string
+import sys
+import time
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.3.0"
+APP_NAME = "Batch Folder Renamer"
+
+# --- Single Instance Logic START with Timeout ---
+APP_LOCK_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("HOME", "/tmp")), APP_NAME)
+LOCK_FILE = os.path.join(APP_LOCK_DIR, "app.lock")
+LOCK_TIMEOUT_SECONDS = 60
+
+os.makedirs(APP_LOCK_DIR, exist_ok=True)
+IS_LOCK_CREATED = False
+
+if os.path.exists(LOCK_FILE):
+    try:
+        lock_age = time.time() - os.path.getmtime(LOCK_FILE)
+
+        if lock_age > LOCK_TIMEOUT_SECONDS:
+            os.remove(LOCK_FILE)
+            print(f"Removed stale lock file (Age: {int(lock_age)}s).")
+        else:
+            try:
+                temp_root = tk.Tk()
+                temp_root.withdraw()
+                messagebox.showwarning(
+                    f"{APP_NAME} v{APP_VERSION}",
+                    f"{APP_NAME} is already running.\nOnly one instance is allowed.",
+                )
+                temp_root.destroy()
+            except Exception:
+                print("Application is already running.")
+
+            sys.exit(0)
+
+    except Exception as e:
+        print(f"Error checking lock file: {e}. Exiting.")
+        sys.exit(0)
+
+try:
+    with open(LOCK_FILE, "w") as f:
+        f.write(str(os.getpid()))
+    IS_LOCK_CREATED = True
+except Exception as e:
+    print(f"Could not create lock file: {e}")
+    sys.exit(1)
+
+# --- Single Instance Logic END with Timeout ---
 
 
 class BatchFolderRenamer(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title(f"Batch Folder Renamer v{APP_VERSION}")
+        self.title(f"{APP_NAME} v{APP_VERSION}")
         self.iconpath = ImageTk.PhotoImage(file=self.resource_path("icon.png"))
         self.wm_iconbitmap()
         self.iconphoto(False, self.iconpath)
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
         self.update_idletasks()
         width = 500
         height = 500
@@ -71,6 +119,55 @@ class BatchFolderRenamer(ctk.CTk):
         self.start_btn.grid(row=2, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="nsew")
         self.start_btn.configure(font=ctk.CTkFont(size=16, weight="bold"))
         self.start_btn.configure(command=self.start_process_threaded)
+
+        # --- Lock Updater Control START ---
+        self.lock_refresh_active = True
+        if "IS_LOCK_CREATED" in globals() and IS_LOCK_CREATED:
+            self.lock_thread = threading.Thread(target=self._lock_updater, daemon=True)
+            self.lock_thread.start()
+            print("Started lock refresh thread.")
+        # --- Lock Updater Control END ---
+
+    def _lock_updater(self):
+        """
+        Periodically updates the lock file timestamp to keep the lock fresh.
+        Runs in a separate thread.
+        """
+        global IS_LOCK_CREATED
+        if not IS_LOCK_CREATED:
+            return
+
+        while self.lock_refresh_active:
+            try:
+                os.utime(LOCK_FILE, None)
+                print("Lock file timestamp updated.")
+            except Exception as e:
+                print(f"Error refreshing lock: {e}")
+                break
+
+            time.sleep(LOCK_TIMEOUT_SECONDS / 2)
+
+        print("Lock refresh thread stopped.")
+
+    def on_close(self):
+        """
+        Handles application shutdown, cleans up the lock file, saves config,
+        and checks if a process is running before exiting.
+        """
+
+        # --- Single Instance Cleanup START ---
+        global IS_LOCK_CREATED
+        if "IS_LOCK_CREATED" in globals() and IS_LOCK_CREATED:
+            self.lock_refresh_active = False
+            try:
+                if self.lock_thread.is_alive():
+                    self.lock_thread.join(0.5)
+                os.remove(LOCK_FILE)
+            except Exception as e:
+                print(f"Could not remove lock file: {e}")
+        # --- Single Instance Cleanup END ---
+
+        self.destroy()
 
     def resource_path(self, relative_path):
         temp_dir = os.path.dirname(__file__)
