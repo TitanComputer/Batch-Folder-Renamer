@@ -61,7 +61,7 @@ class BatchFolderRenamer(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title(f"{APP_NAME} v{APP_VERSION}")
-        self.iconpath = ImageTk.PhotoImage(file=self.resource_path("icon.png"))
+        self.iconpath = ImageTk.PhotoImage(file=self.resource_path(os.path.join("assets", "icon.png")))
         self.wm_iconbitmap()
         self.iconphoto(False, self.iconpath)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -193,7 +193,9 @@ class BatchFolderRenamer(ctk.CTk):
         prefixes = [line.strip() for line in self.prefix_text.get("0.0", "end").splitlines() if line.strip()]
 
         count = 0
-        for item in os.listdir(folder_path):
+        items = os.listdir(folder_path)
+        total_folders = len(items)
+        for item in items:
             full_path = os.path.join(folder_path, item)
             if os.path.isdir(full_path):
                 new_name = item
@@ -224,7 +226,16 @@ class BatchFolderRenamer(ctk.CTk):
                 new_name = new_name.replace("&", "And")
 
                 # Capitalize and convert spaces to hyphens
-                new_name = new_name.title()
+                words = new_name.split()
+
+                fixed_words = []
+                for w in words:
+                    if any(char.isdigit() for char in w):
+                        fixed_words.append(w)
+                    else:
+                        fixed_words.append(w.capitalize())
+
+                new_name = " ".join(fixed_words)
                 new_name = new_name.replace(" ", "-")
 
                 def case_sensitive_exists(path):
@@ -246,10 +257,17 @@ class BatchFolderRenamer(ctk.CTk):
                             )
                             return
 
-        if count == 0:
-            messagebox.showinfo("Done", "No folders were processed.")
+        failed = total_folders - count
+        if total_folders == 0:
+            messagebox.showinfo("Done", "No folders found in the selected directory.")
+        elif count == total_folders:
+            messagebox.showinfo("Done", f"All {count} folder(s) were renamed successfully.")
+        elif count == 0:
+            messagebox.showinfo("Done", f"No folders were renamed.\n{failed} folder(s) could not be renamed.")
         else:
-            messagebox.showinfo("Done", f"{count} folders renamed successfully.")
+            messagebox.showinfo(
+                "Done", f"{count} folder(s) were renamed successfully.\n" f"{failed} folder(s) could not be renamed."
+            )
 
 
 if __name__ == "__main__":
