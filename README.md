@@ -74,7 +74,8 @@ pip install -r requirements.txt
 batch-folder-renamer/
 │
 ├── main.py             # Main application entry point
-├── icon.png            # Project icon
+├── assets/
+│   └── icon.png        # Project icon
 ├── README.md           # Project documentation
 └── requirements.txt    # Python dependencies
 ```
@@ -89,7 +90,7 @@ The executable was built using [`Nuitka`](https://nuitka.net/) and [`UPX`](https
 You can build the standalone executable using the following command:
 
 ```bash
-.\venv\Scripts\python.exe -m nuitka --jobs=4 --enable-plugin=upx --upx-binary="YOUR PATH\upx.exe" --enable-plugin=multiprocessing --lto=yes --enable-plugin=tk-inter --windows-console-mode=disable --follow-imports --windows-icon-from-ico="icon.png" --include-data-files=icon.png=icon.png --python-flag=no_site,no_asserts,no_docstrings --onefile --standalone --msvc=latest --output-filename=Batch-Folder-Renamer main.py
+.\venv\Scripts\python.exe -m nuitka --jobs=4 --enable-plugin=upx --upx-binary="YOUR PATH\upx.exe" --enable-plugin=multiprocessing --lto=yes --enable-plugin=tk-inter --windows-console-mode=disable --follow-imports --windows-icon-from-ico="assets/icon.png" --include-data-dir=assets=assets --python-flag=no_site,no_asserts,no_docstrings,static_hashes --onefile --onefile-no-compression --standalone --msvc=latest --output-filename=Batch-Folder-Renamer main.py
 ```
 
 ## 🚀 CI/CD
