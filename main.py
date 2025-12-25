@@ -14,6 +14,24 @@ import webbrowser
 
 APP_VERSION = "1.4.1"
 APP_NAME = "Batch Folder Renamer"
+CONFIG_FILENAME = "config.json"
+
+# Default configuration structure
+DEFAULT_CONFIG = {
+    "app_name": APP_NAME,
+    "app_version": APP_VERSION,
+    "folder_path": "",
+    "prefix_text": "",
+}
+
+# Determine configuration directory based on OS
+if sys.platform == "win32":
+    CONFIG_DIR = os.path.join(os.getenv("LOCALAPPDATA", "/tmp"), APP_NAME)
+else:
+    CONFIG_DIR = os.path.join(os.getenv("HOME", "/tmp"), f".{APP_NAME}")
+
+CONFIG_FILE = os.path.join(CONFIG_DIR, CONFIG_FILENAME)
+os.makedirs(CONFIG_DIR, exist_ok=True)
 
 # --- Single Instance Logic START with Timeout ---
 APP_LOCK_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("HOME", "/tmp")), APP_NAME)
@@ -109,8 +127,7 @@ class BatchFolderRenamer(ctk.CTk):
         font_bold = ctk.CTkFont(size=14, weight="bold")
 
         # Row 1: Entry + Browse Button
-        self.path_entry = ctk.CTkEntry(self, height=20, placeholder_text="Target Directory", font=font_bold)
-        self.path_entry.insert(0, "C:\\inetpub\\wwwroot\\T2")
+        self.path_entry = ctk.CTkEntry(self, height=20, placeholder_text="Select Target Folder", font=font_bold)
         self.path_entry.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="nsew")
         self.path_entry.configure(state="readonly")
 
@@ -141,18 +158,19 @@ class BatchFolderRenamer(ctk.CTk):
         # Row 3: Start + Donate Buttons (inside a local frame)
         button_frame = ctk.CTkFrame(self, fg_color="transparent")
         button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="nsew")
-
+        button_frame.grid_propagate(False)
+        button_frame.configure(height=15)
         # Local grid configuration (no changes to main layout)
-        button_frame.grid_columnconfigure(0, weight=3)
-        button_frame.grid_columnconfigure(1, weight=1)
+        button_frame.grid_columnconfigure(0, weight=5)
+        button_frame.grid_columnconfigure(1, weight=3)
+        button_frame.grid_columnconfigure(2, weight=2)
         button_frame.grid_rowconfigure(0, weight=1)
 
         # Start Button
         self.start_btn = ctk.CTkButton(
             button_frame,
             text="Start Process",
-            height=20,
-            font=ctk.CTkFont(size=20, weight="bold"),
+            font=ctk.CTkFont(size=18, weight="bold"),
             command=self.start_process_threaded,
         )
         self.start_btn.grid(row=0, column=0, padx=(0, 5), sticky="nsew")
@@ -166,11 +184,22 @@ class BatchFolderRenamer(ctk.CTk):
             fg_color="#FFD700",
             hover_color="#FFC400",
             text_color="#000000",
-            font=ctk.CTkFont(size=20, weight="bold"),
-            height=20,
+            font=ctk.CTkFont(size=18, weight="bold"),
             command=self.donate,
         )
-        self.donate_button.grid(row=0, column=1, padx=(5, 0), sticky="nsew")
+        self.donate_button.grid(row=0, column=1, padx=5, sticky="nsew")
+
+        # Reset Button
+        self.reset_button = ctk.CTkButton(
+            button_frame,
+            text="Reset Settings",
+            fg_color="#A9A9A9",  # Dark Gray
+            hover_color="#808080",  # Gray
+            text_color="#000000",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            command=self._reset_settings,
+        )
+        self.reset_button.grid(row=0, column=2, padx=(5, 0), sticky="nsew")
 
         # --- Lock Updater Control START ---
         self.lock_refresh_active = True
@@ -179,6 +208,11 @@ class BatchFolderRenamer(ctk.CTk):
             self.lock_thread.start()
             print("Started lock refresh thread.")
         # --- Lock Updater Control END ---
+
+    def _reset_settings(self):
+        """Resets all configuration settings to their default values."""
+
+        messagebox.showinfo("Settings Reset", "All settings have been reset to default values.")
 
     def _lock_updater(self):
         """
@@ -226,7 +260,10 @@ class BatchFolderRenamer(ctk.CTk):
         return os.path.join(temp_dir, relative_path)
 
     def browse_folder(self):
-        folder_selected = filedialog.askdirectory(title="Select Target Folder")
+        initial_dir = (
+            self.path_entry.get() if os.path.isdir(self.path_entry.get()) else os.path.expanduser("~/Documents")
+        )
+        folder_selected = filedialog.askdirectory(initialdir=initial_dir, title="Select Target Folder")
         if folder_selected:
             self.path_entry.configure(state="normal")
             self.path_entry.delete(0, "end")
@@ -238,8 +275,15 @@ class BatchFolderRenamer(ctk.CTk):
 
     def start_process(self):
         folder_path = self.path_entry.get()
+        if not folder_path:
+            messagebox.showerror("Error", "Please select a folder.")
+            return
         if not os.path.isdir(folder_path):
             messagebox.showerror("Error", "Selected folder does not exist.")
+            self.path_entry.configure(state="normal")
+            self.path_entry.delete(0, "end")
+            self.path_entry.configure(placeholder_text="Select Target Folder")
+            self.path_entry.configure(state="readonly")
             return
 
         prefixes = [line.strip() for line in self.prefix_text.get("0.0", "end").splitlines() if line.strip()]
