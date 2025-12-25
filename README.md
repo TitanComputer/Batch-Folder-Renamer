@@ -75,7 +75,9 @@ batch-folder-renamer/
 │
 ├── main.py             # Main application entry point
 ├── assets/
-│   └── icon.png        # Project icon
+│   ├── icon.png        # Project icon
+│   ├── heart.png       # Heart Logo
+│   └── donate.png      # Donate Picture
 ├── README.md           # Project documentation
 └── requirements.txt    # Python dependencies
 ```
