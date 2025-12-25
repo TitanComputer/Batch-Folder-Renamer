@@ -12,7 +12,7 @@ import sys
 import time
 import webbrowser
 
-APP_VERSION = "1.4.0"
+APP_VERSION = "1.4.1"
 APP_NAME = "Batch Folder Renamer"
 
 # --- Single Instance Logic START with Timeout ---
@@ -244,10 +244,13 @@ class BatchFolderRenamer(ctk.CTk):
 
         prefixes = [line.strip() for line in self.prefix_text.get("0.0", "end").splitlines() if line.strip()]
 
-        count = 0
         items = os.listdir(folder_path)
-        total_folders = len(items)
-        for item in items:
+        folders = [i for i in items if os.path.isdir(os.path.join(folder_path, i))]
+        total_folders = len(folders)
+        renamed_count = 0
+        skipped_count = 0
+        failed_count = 0
+        for item in folders:
             full_path = os.path.join(folder_path, item)
             if os.path.isdir(full_path):
                 new_name = item
@@ -294,13 +297,21 @@ class BatchFolderRenamer(ctk.CTk):
                     directory, name = os.path.split(path)
                     return name in os.listdir(directory)
 
-                if new_name and new_name != item:
+                if not new_name:
+                    failed_count += 1
+
+                elif new_name == item:
+                    # Folder already has the correct name
+                    skipped_count += 1
+
+                else:
                     new_full_path = os.path.join(folder_path, new_name)
-                    if not case_sensitive_exists(new_full_path):
-                        # if not os.path.exists(new_full_path):
+                    if case_sensitive_exists(new_full_path):
+                        failed_count += 1
+                    else:
                         try:
                             os.rename(full_path, new_full_path)
-                            count += 1
+                            renamed_count += 1
                         except PermissionError:
                             messagebox.showerror(
                                 "Access Denied",
@@ -309,16 +320,40 @@ class BatchFolderRenamer(ctk.CTk):
                             )
                             return
 
-        failed = total_folders - count
         if total_folders == 0:
-            messagebox.showinfo("Done", "No folders found in the selected directory.")
-        elif count == total_folders:
-            messagebox.showinfo("Done", f"All {count} folder(s) were renamed successfully.")
-        elif count == 0:
-            messagebox.showinfo("Done", f"No folders were renamed.\n{failed} folder(s) could not be renamed.")
+            messagebox.showinfo("Done", "No folders were found in the selected directory.\n" "Nothing to process.")
+
+        elif renamed_count == total_folders:
+            messagebox.showinfo(
+                "Done", f"All folders were processed successfully.\n\n" f"Renamed folders: {renamed_count}"
+            )
+
+        elif skipped_count == total_folders:
+            messagebox.showinfo(
+                "Done",
+                f"All folders already had correct names.\n\n"
+                f"Checked folders: {skipped_count}\n"
+                f"No changes were required.",
+            )
+
+        elif renamed_count == 0 and failed_count == total_folders:
+            messagebox.showinfo("Done", f"No folders could be renamed.\n\n" f"Failed to rename: {failed_count}")
+
+        elif failed_count == 0:
+            messagebox.showinfo(
+                "Done",
+                f"Operation completed successfully.\n\n"
+                f"Renamed folders: {renamed_count}\n"
+                f"Already have correct names: {skipped_count}",
+            )
+
         else:
             messagebox.showinfo(
-                "Done", f"{count} folder(s) were renamed successfully.\n" f"{failed} folder(s) could not be renamed."
+                "Done",
+                f"Operation completed successfully.\n\n"
+                f"Renamed folders: {renamed_count}\n"
+                f"Already have correct names: {skipped_count}\n"
+                f"Failed to rename: {failed_count}",
             )
 
     def donate(self):
