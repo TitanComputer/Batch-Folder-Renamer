@@ -8,6 +8,8 @@ A simple batch folder renaming tool with a minimal GUI built using CustomTkinter
 - 🚀 Automatically remove predefined prefixes.
 - 🧠 Clean up suffixes (TV series season numbers).
 - 🔄 Format folder names by removing extra spaces and dots.
+- 🎨 Convert folder names to Title Case
+- 💾 Automatically save your settings to a config file and load them on startup.
 - 📥 Downloadable `.exe` version (Windows only)
 
 
@@ -52,6 +54,9 @@ Or, run the Batch-Folder-Renamer.exe file directly if you downloaded the compile
      - Replace dots (`.`), underscores (`_`), or dashes (`-`) with spaces.  
      - Capitalize each word (Title Case).  
      - Replace spaces with dashes (`-`).  
+
+4. **Save Changes**
+   - The program will automatically save your settings to a config file for future use and load them on startup.
 
 ---
 
