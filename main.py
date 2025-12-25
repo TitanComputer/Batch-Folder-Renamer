@@ -11,8 +11,9 @@ import string
 import sys
 import time
 import webbrowser
+import json
 
-APP_VERSION = "1.4.1"
+APP_VERSION = "1.5.0"
 APP_NAME = "Batch Folder Renamer"
 CONFIG_FILENAME = "config.json"
 
@@ -21,7 +22,7 @@ DEFAULT_CONFIG = {
     "app_name": APP_NAME,
     "app_version": APP_VERSION,
     "folder_path": "",
-    "prefix_text": "",
+    "prefix_text": [],
 }
 
 # Determine configuration directory based on OS
@@ -142,7 +143,11 @@ class BatchFolderRenamer(ctk.CTk):
         self.prefix_container.grid_rowconfigure(1, weight=1)
         self.prefix_container.grid_columnconfigure(0, weight=1)
 
-        self.prefix_label = ctk.CTkLabel(self.prefix_container, text="Prefixes To Remove", anchor="w")
+        self.prefix_label = ctk.CTkLabel(
+            self.prefix_container,
+            text="Prefixes To Remove From Folder Names (Enter each prefix on a new line):",
+            anchor="w",
+        )
         self.prefix_label.grid(row=0, column=0, padx=5, pady=(5, 0), sticky="w")
 
         self.prefix_text = ctk.CTkTextbox(
@@ -152,8 +157,6 @@ class BatchFolderRenamer(ctk.CTk):
             corner_radius=0,
         )
         self.prefix_text.grid(row=1, column=0, sticky="nsew", padx=(5, 0), pady=5)
-        self.prefix_text.insert("0.0", "Torrenting\n")
-        self.prefix_text.insert("1.0", "www.UIndex.org\n")
 
         # Row 3: Start + Donate Buttons (inside a local frame)
         button_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -209,9 +212,13 @@ class BatchFolderRenamer(ctk.CTk):
             print("Started lock refresh thread.")
         # --- Lock Updater Control END ---
 
+        # Load config to overwrite default variable values
+        self.load_config()
+
     def _reset_settings(self):
         """Resets all configuration settings to their default values."""
-
+        self._apply_default_config()
+        self.save_config()
         messagebox.showinfo("Settings Reset", "All settings have been reset to default values.")
 
     def _lock_updater(self):
@@ -240,6 +247,8 @@ class BatchFolderRenamer(ctk.CTk):
         Handles application shutdown, cleans up the lock file, saves config,
         and checks if a process is running before exiting.
         """
+        # Save settings on exit
+        self.save_config()
 
         # --- Single Instance Cleanup START ---
         global IS_LOCK_CREATED
@@ -259,6 +268,71 @@ class BatchFolderRenamer(ctk.CTk):
         temp_dir = os.path.dirname(__file__)
         return os.path.join(temp_dir, relative_path)
 
+    # --- Config Management Methods ---
+    def load_config(self):
+        """Loads configuration from config.json or creates default config if missing."""
+        if not os.path.isfile(CONFIG_FILE):
+            # No config exists → create default
+            self._apply_default_config()
+            self.save_config()
+            return
+
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception:
+            # Corrupted config → fallback to default
+            self._apply_default_config()
+            self.save_config()
+            return
+
+        # Load values safely
+        folder_path = config.get("folder_path", "")
+        prefix_list = config.get("prefix_text", [])
+
+        # Apply folder path
+        if folder_path and os.path.isdir(folder_path):
+            self.path_entry.configure(state="normal")
+            self.path_entry.delete(0, "end")
+            self.path_entry.insert(0, folder_path)
+            self.path_entry.configure(state="readonly")
+
+        # Apply prefixes
+        self.prefix_text.delete("0.0", "end")
+        if isinstance(prefix_list, list):
+            for line in prefix_list:
+                self.prefix_text.insert("end", f"{line}\n")
+
+    def _apply_default_config(self):
+        """Applies values from DEFAULT_CONFIG to UI."""
+        # Reset folder path
+        self.path_entry.configure(state="normal")
+        self.path_entry.delete(0, "end")
+        self.path_entry.configure(placeholder_text="Select Target Folder")
+        self.path_entry.configure(state="readonly")
+
+        # Reset prefixes
+        self.prefix_text.delete("0.0", "end")
+
+    def save_config(self):
+        """Saves current application settings to config.json."""
+        folder_path = self.path_entry.get()
+
+        prefix_list = [line.strip() for line in self.prefix_text.get("0.0", "end").splitlines() if line.strip()]
+
+        config = {
+            "app_name": APP_NAME,
+            "app_version": APP_VERSION,
+            "folder_path": folder_path if os.path.isdir(folder_path) else "",
+            "prefix_text": prefix_list,
+        }
+
+        try:
+            with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=4)
+        except Exception as e:
+            print(f"Failed to save config: {e}")
+
     def browse_folder(self):
         initial_dir = (
             self.path_entry.get() if os.path.isdir(self.path_entry.get()) else os.path.expanduser("~/Documents")
@@ -274,6 +348,7 @@ class BatchFolderRenamer(ctk.CTk):
         threading.Thread(target=self.start_process, daemon=True).start()
 
     def start_process(self):
+        self.save_config()
         folder_path = self.path_entry.get()
         if not folder_path:
             messagebox.showerror("Error", "Please select a folder.")
